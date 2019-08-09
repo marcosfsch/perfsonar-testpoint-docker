@@ -1,14 +1,23 @@
 # perfSONAR Testpoint
 
-FROM centos:centos7
+FROM centos/systemd
 MAINTAINER perfSONAR <perfsonar-user@perfsonar.net>
 
 
-RUN yum -y install epel-release
-RUN yum -y install http://software.internet2.edu/rpms/el7/x86_64/main/RPMS/perfSONAR-repo-0.8-1.noarch.rpm 
-RUN yum -y update; yum clean all
-RUN yum -y install perfsonar-testpoint
-RUN yum -y install supervisor rsyslog net-tools sysstat iproute bind-utils tcpdump # grab a few other needed tools
+RUN yum -y install \
+    epel-release \
+    http://software.internet2.edu/rpms/el7/x86_64/main/RPMS/perfSONAR-repo-0.8-1.noarch.rpm \
+ && yum -y install \
+    bind-utils \
+    iproute \
+    net-tools \
+    perfsonar-testpoint \
+    rsyslog \
+    supervisor \
+    sysstat \ 
+    tcpdump \
+ && yum clean all \
+ && rm -rf /var/cache/yum
 
 # -----------------------------------------------------------------------
 
@@ -64,15 +73,13 @@ COPY rsyslog/owamp-syslog.conf /etc/rsyslog.d/owamp-syslog.conf
 
 # -----------------------------------------------------------------------------
 
-RUN mkdir -p /var/log/supervisor 
-ADD supervisord.conf /etc/supervisord.conf
-
 # The following ports are used:
 # pScheduler: 443
 # owamp:861, 8760-9960
-# ranges not supported in docker, so need to use docker run -P to expose all ports
+EXPOSE 443 861 8760-9960
 
-# add pid directory, logging, and postgres directory
-VOLUME ["/var/run", "/var/lib/pgsql", "/var/log", "/etc/rsyslog.d" ]
+# add logging, and postgres directory
+VOLUME [ "/var/lib/pgsql", "/var/log", "/etc/rsyslog.d" ]
 
-CMD /usr/bin/supervisord -c /etc/supervisord.conf
+STOPSIGNAL SIGRTMIN+3
+
