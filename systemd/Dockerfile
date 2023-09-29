@@ -1,6 +1,6 @@
 # perfSONAR Testpoint
 
-FROM rockylinux/rockylinux:8
+FROM rockylinux/rockylinux:9-ubi-init
 ENV container docker
 
 # -----------------------------------------------------------------------
@@ -27,8 +27,8 @@ RUN systemctl mask dev-hugepages.mount sys-fs-fuse-connections.mount
 
 RUN dnf -y install \
     epel-release \
-    http://software.internet2.edu/rpms/el8/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm \
-    && dnf config-manager --set-enabled powertools \
+    http://software.internet2.edu/rpms/el9/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm \
+    && dnf config-manager --set-enabled crb \
     && dnf -y install \
     rsyslog \
     net-tools \
